@@ -1,9 +1,18 @@
+
 import js from "@eslint/js";
 import globals from "globals";
-import pluginVue from "eslint-plugin-vue";
-import { defineConfig } from "eslint/config";
+import prettier from "eslint-config-prettier";
 
-export default defineConfig([
-  { files: ["**/*.{js,mjs,cjs,vue}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
-  pluginVue.configs["flat/essential"],
-]);
+export default [
+  {
+    files: ["**/*.js"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: globals.node,
+    },
+    rules: js.configs.recommended.rules,
+  },
+  prettier,
+];
+
+
