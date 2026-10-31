@@ -1,11 +1,15 @@
 const express = require("express");
 const cors = require("cors");
-// Import Router quản lý các API liên quan đến contacts (danh bạ).
-// File này chứa các route con, ví dụ: lấy danh sách, thêm, sửa, xóa contact.
+// Import Router quản lý các API liên quan đến contacts (danh bạ). File này chứa các route con, ví dụ: lấy danh sách, thêm, sửa, xóa contact.
 const contactsRouter = require("./app/routes/contact.route");
-// Tạo một ứng dụng Express.
-// Biến app dùng để cấu hình middleware, khai báo route và khởi chạy server.
+
+// Tạo một ứng dụng Express. Biến app dùng để cấu hình middleware, khai báo route và khởi chạy server.
 const app = express();
+
+//Tạo api xử lí lỗi
+const ApiError = require("./app/api-error");
+
+
 app.use(cors());
 // Đăng ký middleware CORS cho toàn bộ ứng dụng.
 // Giúp trình duyệt cho phép frontend gọi API backend khi khác origin.
@@ -24,9 +28,27 @@ app.get("/", (req, res) => {
 });
 
 // Gắn Router contacts vào tiền tố "/api/contacts".
-// Các route được khai báo trong contactsRouter sẽ có tiền tố này.
+// Các route được khai báo trong contacts.route sẽ có tiền tố này.
 app.use("/api/contacts", contactsRouter);
 
+app.use((req, res, next) => {
+    //Code ở đây được định nghĩa để xử lí lỗi khi route không tồn tại
+    
+    return next(new ApiError(404, "Resource not found")); 
+});
+
+
+// 2. Middleware xử lý lỗi tập trung (Phải định nghĩa cuối cùng, có đủ 4 tham số)
+app.use((err, req, res, next) => {
+    // Trong các đoạn code ở route, gọi next(error) sẽ chuyển về middleware này
+    const statusCode = err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    return res.status(statusCode).json({
+        message: message,
+    });
+});
+
+
 // Xuất ứng dụng Express để file khác có thể import và sử dụng.
-// Ví dụ: file server.js có thể require("./app") rồi gọi app.listen(...).
 module.exports = app;
